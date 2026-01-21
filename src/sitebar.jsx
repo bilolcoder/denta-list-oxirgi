@@ -63,7 +63,7 @@ function Sitebar() {
         {
             path: '/yoqtirishlar',
             Icon: FaUserDoctor,
-            label: 'Shifokorlarim',
+            label: 'Doktorlarim',
             isActive: currentPath === '/yoqtirishlar' || isChatPage
         },
         {
@@ -112,7 +112,7 @@ function Sitebar() {
 
 
     return (
-        <header className='w-full h-[71px] border border-gray-400 fixed bg-white bottom-0 left-0 z-50'>
+        <header className='w-full h-[71px] border-t border-gray-400 fixed bg-white bottom-0 left-0 z-50'>
             <nav className='h-full flex items-center'>
                 <ul className="m-auto w-[90%] flex justify-between">
                     {navItems.map((item) => {
