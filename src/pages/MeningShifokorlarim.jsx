@@ -149,7 +149,7 @@ function MeningShifokorlarim() {
     <div className="w-full min-h-screen p-5 md:px-10 lg:px-[70px] xl:px-[100px] bg-gray-50 flex flex-col mb-[71px]">
       <h1 className="text-2xl md:text-3xl font-bold mb-8 mt-5 text-gray-800 flex items-center gap-3">
         <IoCalendarOutline className="text-cyan-600" />
-        Mening Qabullarim
+        Qabullar ro'yxati
       </h1>
 
       {appointments.length === 0 ? (

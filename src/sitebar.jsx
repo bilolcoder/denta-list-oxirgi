@@ -59,7 +59,7 @@ function Sitebar() {
                     />
                 </svg>
             ),
-            label: 'Mening qabullarim',
+            label: 'Qabullar ro\'yxati',
             isActive: currentPath === '/mening-shifokorlarim'
         },
         {
