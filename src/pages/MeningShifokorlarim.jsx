@@ -108,11 +108,11 @@ function MeningShifokorlarim() {
   // Statusni chiroyli ko'rsatish
   const renderStatus = (status) => {
     switch (status) {
-      case 'pending': return <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">Kutilmoqda</span>;
-      case 'confirmed': return <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Tasdiqlangan</span>;
-      case 'completed': return <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">Yakunlangan</span>;
-      case 'cancelled': return <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">Bekor qilingan</span>;
-      default: return <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">{status || 'Noma\'lum'}</span>;
+      case 'pending': return <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold max-sm:text-[8px]">Kutilmoqda</span>;
+      case 'confirmed': return <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold max-sm:text-[8px]">Tasdiqlangan</span>;
+      case 'completed': return <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold max-sm:text-[8px]">Yakunlangan</span>;
+      case 'cancelled': return <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold max-sm:text-[8px]">Bekor qilingan</span>;
+      default: return <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold max-sm:text-[8px]">{status || 'Noma\'lum'}</span>;
     }
   };
 
@@ -169,7 +169,7 @@ function MeningShifokorlarim() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 min-[500px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {appointments.map((appt) => {
             // Doktorni topish
             const doctorId = typeof appt.doctor === 'object' ? appt.doctor._id : appt.doctor;
@@ -203,33 +203,33 @@ function MeningShifokorlarim() {
 
                   {/* Overlay gradient text - rasm pastida o'qish oson bo'lishi uchun */}
                   <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-5">
-                    <h3 className="text-xl font-bold text-white leading-tight">
+                    <h3 className="text-xl font-bold text-white break-words max-sm:text-[15px] leading-tight">
                       {doctorDetails.fullName || "Shifokor"}
                     </h3>
-                    <p className="text-white/90 text-sm font-medium">
+                    <p className="text-white/90 text-sm max-sm:text-[10px] font-medium">
                       {doctorDetails.specialty || "Mutaxassis"}
                     </p>
                   </div>
                 </div>
 
                 {/* BODY: Qabul ma'lumotlari */}
-                <div className="p-5 flex-1 flex flex-col gap-4">
+                <div className="p-5 max-sm:p-2 flex-1 flex flex-col gap-4">
                   {/* Sana va Vaqt */}
                   <div className="flex items-center gap-4 text-gray-700 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center text-cyan-600">
-                        <IoCalendarOutline />
+                    <div className="flex items-center gap-2 max-sm:gap-1">
+                      <div className="p-2 rounded-lg max-sm:p-2 bg-cyan-100 flex items-center justify-center text-cyan-600">
+                        <IoCalendarOutline className='max-sm:text-[10px]' />
                       </div>
-                      <span className="font-semibold text-sm">
+                      <span className="font-semibold max-sm:text-[10px] text-sm">
                         {formatDateTime(appt.appointmentDate)}
                       </span>
                     </div>
                     <div className="w-[1px] h-8 bg-gray-200"></div>
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600">
-                        <IoTimeOutline />
+                      <div className="p-2 rounded-lg max-sm:p-2 bg-orange-100 flex items-center justify-center text-orange-600">
+                        <IoTimeOutline className='max-sm:text-[10px]' />
                       </div>
-                      <span className="font-semibold text-sm">
+                      <span className="font-semibold max-sm:text-[10px] text-sm">
                         {formatTime(appt.appointmentTime || appt.appointmentDate)}
                       </span>
                     </div>

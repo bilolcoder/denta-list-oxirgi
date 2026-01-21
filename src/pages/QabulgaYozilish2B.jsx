@@ -17,9 +17,16 @@ function QabulgaYozilishVaqt() {
     selectedYear
   } = location.state || {};
 
-  // type="time" uchun format odatda "HH:mm" bo'ladi
   const [selectedTime, setSelectedTime] = useState("");
   const [note, setNote] = useState('');
+
+  // Agar kerak bo'lsa, bu yerni o'zgartirib, real band bo'lmagan vaqtlarni ko'rsatish mumkin
+  const availableTimeSlots = [
+    "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+    "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
+    "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
+    "17:00", "17:30", "18:00","18:30","19:00", "19:30","20:00", "20:30","21:00", "21:30","22:00", "22:30","23:00", "23:30","00:00"
+  ];
 
   if (!doctor || !doctorId || !appointmentDate) {
     return (
@@ -39,7 +46,6 @@ function QabulgaYozilishVaqt() {
     );
   }
 
-  // type="time" dan kelgan qiymat "HH:mm" formatida bo'ladi
   const getFullAppointmentDateTime = () => {
     if (!selectedTime) return null;
 
@@ -143,30 +149,37 @@ function QabulgaYozilishVaqt() {
               </div>
             </div>
 
-            {/* Vaqt tanlash - type="time" */}
+            {/* Vaqt tanlash — YANGI VERSIYA */}
             <div>
               <h2 className="text-2xl font-bold mb-5 text-gray-800">Qabul vaqti</h2>
 
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <label className="block text-gray-700 font-medium mb-3">
-                  Vaqtni tanlang
+                <label className="block text-gray-700 font-medium mb-4">
+                  Mavjud vaqtlar (tanlang)
                 </label>
 
-                <div className="relative">
-                  <input
-                    type="time"
-                    value={selectedTime}
-                    onChange={(e) => setSelectedTime(e.target.value)}
-                    className="
-                      w-full p-4 text-xl font-medium border-2 border-gray-200 rounded-xl
-                      focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent
-                    "
-                  />
-                  {/* <IoTime className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-2xl pointer-events-none" /> */}
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+                  {availableTimeSlots.map((time) => (
+                    <button
+                      key={time}
+                      type="button"
+                      onClick={() => setSelectedTime(time)}
+                      className={`
+                        py-3 px-4 rounded-xl text-center font-medium transition-all
+                        border-2
+                        ${selectedTime === time
+                          ? "bg-cyan-600 text-white border-cyan-600 shadow-md"
+                          : "bg-white text-gray-700 border-gray-300 hover:border-cyan-400 hover:bg-cyan-50"
+                        }
+                      `}
+                    >
+                      {time}
+                    </button>
+                  ))}
                 </div>
 
-                <p className="text-sm text-gray-500 mt-4 flex items-center gap-2">
-                  <IoTime className="text-cyan-600" />
+                <p className="text-sm text-gray-500 mt-5 flex items-center gap-2">
+                  <IoTime className="text-cyan-600 text-xl" />
                   Qabulga 15 daqiqa oldin kelishingizni tavsiya qilamiz
                 </p>
               </div>
@@ -195,7 +208,7 @@ function QabulgaYozilishVaqt() {
                   <FiCalendar className="text-cyan-600 text-xl" />
                   <div className="flex">
                     <p className="font-bold text-gray-600">Sana:</p>
-                    <p className="font-bold text-gray-900">
+                    <p className="font-bold text-gray-900 ml-2">
                       {selectedDay} {selectedMonthName} {selectedYear}
                     </p>
                   </div>
@@ -205,7 +218,7 @@ function QabulgaYozilishVaqt() {
                   <IoTime className="text-green-600 text-xl" />
                   <div className="flex">
                     <p className="font-bold text-gray-700 text-lg">Vaqt:</p>
-                    <p className="font-bold text-green-700 text-lg">
+                    <p className="font-bold text-green-700 text-lg ml-2">
                       {selectedTime || "Tanlanmagan"}
                     </p>
                   </div>
@@ -250,4 +263,4 @@ function QabulgaYozilishVaqt() {
   );
 }
 
-export default QabulgaYozilishVaqt; 
+export default QabulgaYozilishVaqt;
