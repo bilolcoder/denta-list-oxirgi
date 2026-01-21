@@ -44,13 +44,13 @@ function Sitebar() {
             isActive: currentPath === '/boshsaxifa' || isDoctorPage
         },
         {
-            path: '/mening-shifokorlarim',
+            path: '/yoqtirishlar',
             Icon: FaUserDoctor,
             label: 'Shifokorlarim',
-            isActive: currentPath === '/mening-shifokorlarim' || isChatPage
+            isActive: currentPath === '/yoqtirishlar' || isChatPage
         },
         {
-            path: '/yoqtirishlar',
+            path: '/mening-shifokorlarim',
             Icon: (props) => (  // ⚡ shu yerda SVG-ni bevosita beramiz
                 <svg xmlns="http://www.w3.org/2000/svg" width={18} height={17} fill="none" {...props}>
                     <path
@@ -59,8 +59,8 @@ function Sitebar() {
                     />
                 </svg>
             ),
-            label: 'Buyurtmalar tarixi', 
-            isActive: currentPath === '/yoqtirishlar'
+            label: 'Mening qabullarim',
+            isActive: currentPath === '/mening-shifokorlarim'
         },
         {
             path: '/profil',
@@ -69,7 +69,7 @@ function Sitebar() {
             isActive: currentPath === '/profil'
         },
     ];
-    
+
 
     return (
         <header className='w-full h-[71px] border border-gray-400 fixed bg-white bottom-0 left-0 z-50'>

@@ -7,6 +7,7 @@ import { SlCursor } from "react-icons/sl";
 import { CiStar } from "react-icons/ci";
 import DoctorCard from "./DoctorCard";
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function Boshsaxifa() {
   const navigate = useNavigate();
