@@ -1,0 +1,41 @@
+.splash-screen {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    overflow: hidden;
+  }
+  
+  .logo {
+    width: 200px;   
+    height: 160px;
+    animation: zoomOut 2s forwards;
+  }
+  .sarlavhaKirish2{
+    line-height: 26px;
+    font-weight: 600;
+  }
+  @keyframes zoomOut {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    70% {
+      transform: scale(3); 
+      opacity: 1;
+    }
+    100% {
+      transform: scale(15.5);
+      opacity: 0; 
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .logo {
+      width: 150px;
+      height: 120px;
+    }
+  }
+  

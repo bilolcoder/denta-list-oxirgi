@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@media screen and (max-width: 640px) {
+ #dd{
+    height: 210vh;
+ }
+    
+}
