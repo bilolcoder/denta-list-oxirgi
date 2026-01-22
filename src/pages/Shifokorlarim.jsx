@@ -22,9 +22,54 @@ function Shifokorlarim() {
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState('work');
   const [reviews, setReviews] = useState([]);
+  const [loadingLike, setLoadingLike] = useState(false);
 
-  // Token borligini tekshirish
-  const isAuthenticated = !!localStorage.getItem("accessToken");
+  // Token va ma'lumotlarni olish
+  const token = localStorage.getItem("accessToken");
+  const isAuthenticated = !!token;
+
+  // Shifokorni like bosilganligini tekshirish funksiyasi
+  const checkIfLiked = async () => {
+    try {
+      console.log("Checking if doctor is liked...");
+      const response = await axios.get(`https://app.dentago.uz/api/favorites`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log("Favorites API response:", response.data);
+
+      // Response strukturasi: { success: true, data: [...] }
+      const favorites = response.data.data || [];
+
+      console.log("Current favorites:", favorites);
+      console.log("Current doctor id:", id);
+
+      // Har bir favorite object'ni tekshirish
+      const isDoctorInFavorites = favorites.some(fav => {
+        console.log("Checking favorite item:", fav);
+        // Har xil strukturalar uchun tekshirish
+        return (
+          fav.doctor?._id === id ||
+          fav.doctorId === id ||
+          fav._id === id ||
+          (fav.doctor && fav.doctor.id === id)
+        );
+      });
+
+      console.log("Is doctor in favorites?", isDoctorInFavorites);
+      setIsLiked(isDoctorInFavorites);
+
+    } catch (error) {
+      console.error("Favoritelarni tekshirishda xato:", error);
+      // Agar 401 xatolik bo'lsa, token noto'g'ri yoki muddati o'tgan
+      if (error.response?.status === 401) {
+        console.log("Token expired or invalid");
+        setIsLiked(false);
+      }
+    }
+  };
 
   // API dan shifokor ma'lumotlarini olish
   useEffect(() => {
@@ -52,6 +97,76 @@ function Shifokorlarim() {
     fetchDoctor();
   }, [id]);
 
+  // Foydalanuvchi tizimga kirgan bo'lsa, shifokorni like bosilganligini tekshirish
+  useEffect(() => {
+    if (isAuthenticated) {
+      checkIfLiked();
+    } else {
+      // Agar foydalanuvchi tizimga kirmagan bo'lsa, like holatini false qilish
+      setIsLiked(false);
+    }
+  }, [isAuthenticated, id, token]); // id va token dependency'larini qo'shdim
+
+  // Like tugmasini bosganda
+  const handleToggleLike = async () => {
+    // Agar foydalanuvchi tizimga kirmagan bo'lsa
+    if (!isAuthenticated) {
+      const confirmLogin = window.confirm("Shifokorni sevimlilarga qo'shish uchun tizimga kiring. Hozir kirishni xohlaysizmi?");
+      if (confirmLogin) {
+        navigate("/login", { state: { returnUrl: `/doctor/${id}` } });
+      }
+      return;
+    }
+
+    try {
+      setLoadingLike(true);
+
+      if (isLiked) {
+        // Like ni o'chirish - DELETE request
+        await axios.delete(`https://app.dentago.uz/api/favorites/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        setIsLiked(false);
+        console.log("Shifokor sevimlilardan olib tashlandi");
+      } else {
+        // Like qo'shish - POST request
+        await axios.post(`https://app.dentago.uz/api/favorites/${id}`, {}, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        setIsLiked(true);
+        console.log("Shifokor sevimlilarga qo'shildi");
+      }
+    } catch (error) {
+      console.error("Like operatsiyasida xato:", error);
+
+      // Xato xabarini chiqarish
+      if (error.response) {
+        const errorMessage = error.response.data?.message || "Xatolik yuz berdi";
+
+        if (error.response.status === 401) {
+          // Token noto'g'ri yoki muddati o'tgan
+          localStorage.removeItem("accessToken");
+          alert("Sessiya muddati tugagan. Iltimos, qaytadan tizimga kiring.");
+          navigate("/login");
+        } else {
+          alert(errorMessage);
+        }
+      } else {
+        alert("Server bilan bog'lanishda xatolik. Iltimos, internet aloqangizni tekshiring.");
+      }
+
+      // Xato bo'lsa, holatni o'zgartirmaymiz
+      setIsLiked(!isLiked);
+    } finally {
+      setLoadingLike(false);
+    }
+  };
+
   // Yulduzchalarni chiqarish
   const renderStars = (count) => {
     const rating = typeof count === "number" ? count : parseFloat(count) || 4.5;
@@ -70,25 +185,34 @@ function Shifokorlarim() {
 
   const handleBack = () => navigate(-1);
 
-  const handleToggleLike = () => setIsLiked(!isLiked);
-
   const handleQabul = () => {
+    if (!isAuthenticated) {
+      const confirmLogin = window.confirm("Qabulga yozilish uchun tizimga kiring. Hozir kirishni xohlaysizmi?");
+      if (confirmLogin) {
+        navigate("/login", { state: { returnUrl: `/doctor/${id}` } });
+      }
+      return;
+    }
+
     navigate("/qabulgayozilish", {
       state: { doctorId: id, doctor },
     });
   };
 
-  const handleGoToLogin = () => {
-    navigate("/login");
-  };
-
   const handleChat = () => {
+    if (!isAuthenticated) {
+      const confirmLogin = window.confirm("Chat uchun tizimga kiring. Hozir kirishni xohlaysizmi?");
+      if (confirmLogin) {
+        navigate("/login", { state: { returnUrl: `/doctor/${id}` } });
+      }
+      return;
+    }
+
     navigate(`/chat/${id}`, { state: { doctorName: doctor?.fullName } });
   };
 
-  // TO'G'RILANGAN TELEFON FUNKSIYASI
+  // Telefon qilish funksiyasi
   const handleCall = () => {
-    // API dan kelayotgan raqamni tekshirish (phone yoki phoneNumber bo'lishi mumkin)
     const phoneNumber = doctor?.phone || doctor?.phoneNumber;
 
     if (phoneNumber) {
@@ -163,8 +287,18 @@ function Shifokorlarim() {
             <HiOutlineArrowLeft />
           </button>
 
-          <button onClick={handleToggleLike} className="text-2xl md:text-3xl hover:opacity-80 transition">
-            {isLiked ? <AiFillHeart className="text-red-500" /> : <AiOutlineHeart className="text-white" />}
+          <button
+            onClick={handleToggleLike}
+            disabled={loadingLike}
+            className="text-2xl md:text-3xl hover:opacity-80 transition disabled:opacity-50"
+          >
+            {loadingLike ? (
+              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : isLiked ? (
+              <AiFillHeart className="text-red-500" />
+            ) : (
+              <AiOutlineHeart className="text-white" />
+            )}
           </button>
         </div>
 
@@ -186,10 +320,6 @@ function Shifokorlarim() {
 
             <div className="flex flex-wrap items-center gap-3 mb-3">
               <span className="text-lg md:text-xl opacity-90">{doctor.specialty}</span>
-              {/* <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full">
-                <FaStar className="text-yellow-300" />
-                <span className="font-semibold">{doctor.rating || "4.5"}</span>
-              </div> */}
             </div>
 
             {doctor.clinic?.name && <p className="text-lg opacity-80">{doctor.clinic.name}</p>}
@@ -199,15 +329,7 @@ function Shifokorlarim() {
 
       {/* Statistikalar */}
       <div className="bg-white mx-5 md:mx-10 -mt-4 rounded-2xl shadow-lg p-5 border border-gray-100">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {/* <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <PiUsersThreeLight className="text-2xl text-blue-500" />
-              <span className="text-lg font-semibold text-gray-800">{doctor.patientsCount || "0"}</span>
-            </div>
-            <p className="text-sm text-gray-600">Bemorlar</p>
-          </div> */}
-
+        <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
               <MdWorkOutline className="text-2xl text-blue-500" />
@@ -244,9 +366,6 @@ function Shifokorlarim() {
             <div>
               <h3 className="font-semibold text-gray-800 mb-1">Manzil</h3>
               <p className="text-gray-600">{doctor.clinic.address}</p>
-              {/* {doctor.clinic.distanceKm && (
-                <p className="text-sm text-gray-500 mt-1">Masofa: {doctor.clinic.distanceKm} km</p>
-              )} */}
             </div>
           </div>
         )}
@@ -324,21 +443,12 @@ function Shifokorlarim() {
 
       {/* Pastki fixed menyusi */}
       <div className="px-5 md:px-8 lg:px-10 py-3 w-full mt-5 bg-white fixed bottom-[70px] left-0 flex items-center justify-between shadow-2xl border-t border-gray-100 z-50">
-        {isAuthenticated ? (
-          <button
-            onClick={handleQabul}
-            className="flex-1 w-full bg-[#00C1F3] text-white py-3 rounded-2xl font-medium text-[15px] md:text-base transition hover:opacity-90 shadow-md"
-          >
-            Qabulga yozilish
-          </button>
-        ) : (
-          <button
-            onClick={handleGoToLogin}
-            className="flex-1 w-full bg-[#00C1F3] text-white py-3 rounded-2xl font-medium text-[15px] md:text-base transition shadow-md"
-          >
-            Qabulga yozilish uchun tizimga kiring
-          </button>
-        )}
+        <button
+          onClick={handleQabul}
+          className="flex-1 w-full bg-[#00C1F3] text-white py-3 rounded-2xl font-medium text-[15px] md:text-base transition hover:opacity-90 shadow-md"
+        >
+          {isAuthenticated ? "Qabulga yozilish" : "Qabulga yozilish uchun tizimga kiring"}
+        </button>
 
         {/* Telefon tugmasi */}
         <button
