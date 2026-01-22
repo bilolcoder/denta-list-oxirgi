@@ -80,22 +80,11 @@ function Boshsaxifa() {
       setError(null);
 
       // Limitni kattaroq qilish mumkin, masalan 100 yoki serverda cheklov bo'lmasa
-      const apiUrl = `/api/doctors?page=1&limit=100&sort=-rating`;
-      console.log(`API so'rovi: ${apiUrl}`);
-
-      const response = await fetch(apiUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP xato! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (!data.data || !Array.isArray(data.data)) {
+      const { data } = await axios.get(`https://app.dentago.uz/api/public/doctors?page=1&limit=100&sort=-rating`);
+      if (!data.data) {
         throw new Error("API javobi to'g'ri formatda emas");
       }
-
       const formattedDoctors = data.data.map(formatDoctor);
-
       setAllDoctors(formattedDoctors);
       setDisplayedDoctors(formattedDoctors);
     } catch (err) {
@@ -256,10 +245,10 @@ function Boshsaxifa() {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl md:text-3xl font-semibold">
             {activeFilter === "barchasi" ? "Hozirda mavjud mutaxassislar" :
-             activeFilter === "ayol" ? "Ayol doktorlar" :
-             activeFilter === "24_7" ? "24/7 ishlaydigan doktorlar" :
-             activeFilter === "yaxshi" ? "Eng yaxshi reytingdagi doktorlar" :
-             activeFilter === "bola" ? "Bolalar doktorlari" : "Mutaxassislar"}
+              activeFilter === "ayol" ? "Ayol doktorlar" :
+                activeFilter === "24_7" ? "24/7 ishlaydigan doktorlar" :
+                  activeFilter === "yaxshi" ? "Eng yaxshi reytingdagi doktorlar" :
+                    activeFilter === "bola" ? "Bolalar doktorlari" : "Mutaxassislar"}
           </h1>
           {allDoctors.length > 0 && (
             <div className="text-gray-600 text-sm">
