@@ -380,66 +380,36 @@ function Shifokorlarim() {
       </div>
 
       {/* Tablar */}
-      <div className="mt-10 px-5 md:px-10">
-        <div className="flex border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab("work")}
-            className={`flex-1 py-3 font-medium transition ${activeTab === "work" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500 hover:text-gray-700"
-              }`}
-          >
-            Olingan ishlar
-          </button>
-          <button
-            onClick={() => setActiveTab("reviews")}
-            className={`flex-1 py-3 font-medium transition ${activeTab === "reviews" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500 hover:text-gray-700"
-              }`}
-          >
-            Sharhlar ({reviews.length})
-          </button>
+      {activeTab === "work" ? (
+  <div className="px-5 md:px-10 py-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 md:gap-4">
+    {doctor?.gallery?.length > 0 ? (
+      doctor.gallery.map((url, index) => (
+        <div
+          key={index}
+          className="aspect-square rounded-xl overflow-hidden bg-gray-100"
+        >
+          <img
+            src={url}
+            alt=""
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src = "https://via.placeholder.com/300?text=";
+              e.target.alt = "Rasm yuklanmadi";
+            }}
+          />
         </div>
-
-        <div className="mt-6">
-          {activeTab === "work" ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((item) => (
-                <div key={item} className="aspect-square bg-gray-100 rounded-xl flex items-center justify-center">
-                  <span className="text-gray-400">Rasm {item}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {reviews.length > 0 ? (
-                reviews.map((review) => (
-                  <div key={review.id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-blue-500 font-bold">{review.name.charAt(0)}</span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-semibold text-gray-800">{review.name}</h4>
-                            <p className="text-sm text-gray-500">{review.timeAgo}</p>
-                          </div>
-                          {renderStars(review.stars)}
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-gray-700 italic border-l-4 border-blue-500 pl-3 rounded-[10px] py-1">
-                      "{review.text}"
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-10">
-                  <p className="text-gray-500">Hozircha sharhlar mavjud emas</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+      ))
+    ) : (
+      <div className="col-span-full text-center py-16 text-gray-500">
+        Hozircha yuklangan rasmlar yo‘q
       </div>
+    )}
+  </div>
+) : (
+  <div className="text-center py-16 text-gray-500">
+    Hozircha sharhlar mavjud emas
+  </div>
+)}
 
       {/* Pastki fixed menyusi */}
       <div className="px-5 md:px-8 lg:px-10 py-3 w-full mt-5 bg-white fixed bottom-[70px] left-0 flex items-center justify-between shadow-2xl border-t border-gray-100 z-50">
