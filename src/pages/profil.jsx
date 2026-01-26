@@ -57,10 +57,10 @@ function Profil_pages() {
 
   // Menyu elementlari (kirgan foydalanuvchi uchun)
   const menuItems = [
-    { Icon: FaUserDoctor, label: 'Mening shifokorlarim', path: '/mening-shifokorlarim' },
-    { Icon: IoIosHeartEmpty, label: 'Yoqtirishlar', path: '/yoqtirishlar' },
+    { Icon: FaUserDoctor, label: 'Qabullar ro\'yxati', path: '/mening-shifokorlarim' },
+    { Icon: IoIosHeartEmpty, label: 'Doktorlarim', path: '/yoqtirishlar' },
     { Icon: BsChatText, label: 'Sharhlar', path: '/sharhlar' },
-    { Icon: MdOutlineModeEdit, label: "Ma'lumotlarni o'zgartirish", path: '/profile' },
+    // { Icon: MdOutlineModeEdit, label: "Ma'lumotlarni o'zgartirish", path: '/profile' },
     { Icon: FiLogOut, label: 'Tizimdan chiqish', action: () => setIsLogoutModalOpen(true) },
   ];
 
@@ -73,14 +73,14 @@ function Profil_pages() {
       {/* Header */}
       <header className={`bg-[${primaryTeal}] p-4 pb-20 pt-8 rounded-b-[40px] shadow-lg relative`}>
         <div className="flex justify-between items-center mb-6">
-          <FaChevronLeft 
+          <FaChevronLeft
             className="text-white text-2xl cursor-pointer"
             onClick={handleGoBack}
           />
-          <BsChatText 
+          {/* <BsChatText
             className="text-white text-2xl cursor-pointer"
             onClick={handleGoToChats}
-          />
+          /> */}
         </div>
 
         {isAuthenticated ? (
@@ -128,21 +128,21 @@ function Profil_pages() {
       {/* Asosiy kontent - faqat kirgan foydalanuvchi uchun ko'rinadi */}
       {isAuthenticated && (
         <div className='p-4 pt-0'>
-          <div className='relative -mt-10 mb-8'>
+          {/* <div className='relative -mt-10 mb-8'>
             <input
               type="text"
               placeholder="Shifokor yoki klinika qidirish..."
               className="w-full h-12 bg-white rounded-full shadow-md pl-12 pr-12 text-sm focus:outline-none focus:border-blue-600 focus:ring-opacity-50"
             />
             <FaSearch className='absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400' />
-            
+
             <FaRegBell
               className='absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg cursor-pointer'
               onClick={handleGoToNotifications}
             />
-          </div>
+          </div> */}
 
-          <ul className="bg-white rounded-xl shadow-sm">
+          <ul className="bg-white rounded-xl mt-5 shadow-sm">
             {menuItems.map((item, index) => (
               <li
                 key={index}

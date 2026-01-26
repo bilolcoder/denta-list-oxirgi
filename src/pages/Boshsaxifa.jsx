@@ -186,10 +186,10 @@ function Boshsaxifa() {
             className="w-full py-3 pl-10 pr-12 outline-0 rounded-4xl bg-white text-sm md:text-base shadow-[0px_0px_4px_0px_rgba(0,0,0,0.2)]"
           />
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xl" />
-          <IoNotificationsOutline
+          {/* <IoNotificationsOutline
             className="text-white ml-5 text-3xl cursor-pointer hover:opacity-80"
             onClick={notification}
-          />
+          /> */}
         </div>
       </div>
 

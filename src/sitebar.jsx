@@ -105,7 +105,7 @@ function Sitebar() {
                     />
                 </svg>
             ),
-            label: 'Profil',
+            label: 'Profil', 
             isActive: currentPath === '/profil'
         },
     ];
