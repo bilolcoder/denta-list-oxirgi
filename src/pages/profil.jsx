@@ -57,10 +57,10 @@ function Profil_pages() {
 
   // Menyu elementlari (kirgan foydalanuvchi uchun)
   const menuItems = [
-    { Icon: FaUserDoctor, label: 'Qabullar ro\'yxati', path: '/mening-shifokorlarim' },
-    { Icon: IoIosHeartEmpty, label: 'Doktorlarim', path: '/yoqtirishlar' },
+    // { Icon: FaUserDoctor, label: 'Qabullar ro\'yxati', path: '/mening-shifokorlarim' },
+    // { Icon: IoIosHeartEmpty, label: 'Doktorlarim', path: '/yoqtirishlar' },
     { Icon: BsChatText, label: 'Sharhlar', path: '/sharhlar' },
-    // { Icon: MdOutlineModeEdit, label: "Ma'lumotlarni o'zgartirish", path: '/profile' },
+    { Icon: MdOutlineModeEdit, label: "Ma'lumotlarni o'zgartirish", path: '/profile' },
     { Icon: FiLogOut, label: 'Tizimdan chiqish', action: () => setIsLogoutModalOpen(true) },
   ];
 
