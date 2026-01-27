@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { IoInformationCircleOutline, IoCalendarOutline, IoTimeOutline, IoCheckmarkCircle, IoTime } from 'react-icons/io5';
+import { IoInformationCircleOutline, IoCalendarOutline, IoTimeOutline, IoCheckmarkCircle, IoTime, IoStar, IoStarOutline, IoClose } from 'react-icons/io5';
 import axios from 'axios';
+import { useForm } from 'react-hook-form';
 
 function MeningShifokorlarim() {
   const [appointments, setAppointments] = useState([]);
@@ -11,7 +12,34 @@ function MeningShifokorlarim() {
   // Doktorlar ma'lumotlarini saqlash uchun kesh (ID -> Doctor Object)
   const [doctorsMap, setDoctorsMap] = useState({});
 
+  // Modal and rating states
+  const [showConfirmationCard, setShowConfirmationCard] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [confirmedDoctor, setConfirmedDoctor] = useState(null);
+  const [confirmedDoctorsQueue, setConfirmedDoctorsQueue] = useState([]);
+
   const navigate = useNavigate();
+  const { register, handleSubmit, reset } = useForm();
+
+  // LocalStorage helpers for tracking reviewed/skipped doctors
+  const getReviewedDoctors = () => {
+    const reviewed = localStorage.getItem('reviewedDoctors');
+    return reviewed ? JSON.parse(reviewed) : [];
+  };
+
+  const addReviewedDoctor = (doctorId) => {
+    const reviewed = getReviewedDoctors();
+    if (!reviewed.includes(doctorId)) {
+      reviewed.push(doctorId);
+      localStorage.setItem('reviewedDoctors', JSON.stringify(reviewed));
+    }
+  };
+
+  const isDoctorReviewed = (doctorId) => {
+    return getReviewedDoctors().includes(doctorId);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,6 +95,33 @@ function MeningShifokorlarim() {
 
         setDoctorsMap(doctorsInfo);
 
+        // Get confirmed appointments and filter out already reviewed/skipped doctors
+        const confirmedAppointments = appointmentsData.filter(appt => {
+          const doctorId = typeof appt.doctor === 'object' ? appt.doctor._id : appt.doctor;
+          return appt.status === 'confirmed' && !isDoctorReviewed(doctorId);
+        });
+
+        if (confirmedAppointments.length > 0) {
+          // Sort by date (oldest first) to show in order
+          const sortedConfirmed = confirmedAppointments.sort((a, b) => 
+            new Date(a.appointmentDate) - new Date(b.appointmentDate)
+          );
+          
+          // Build queue of doctors
+          const queue = sortedConfirmed.map(appt => {
+            const doctorId = typeof appt.doctor === 'object' ? appt.doctor._id : appt.doctor;
+            return doctorsInfo[doctorId] || (typeof appt.doctor === 'object' ? appt.doctor : {});
+          });
+          
+          setConfirmedDoctorsQueue(queue);
+          
+          // Show the first doctor in queue
+          if (queue.length > 0) {
+            setConfirmedDoctor(queue[0]);
+            setShowConfirmationCard(true);
+          }
+        }
+
       } catch (err) {
         console.error('Xato:', err.response?.data || err.message);
         setError(
@@ -113,6 +168,57 @@ function MeningShifokorlarim() {
       case 'completed': return <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold max-sm:text-[8px]">Yakunlangan</span>;
       case 'cancelled': return <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold max-sm:text-[8px]">Bekor qilingan</span>;
       default: return <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold max-sm:text-[8px]">{status || 'Noma\'lum'}</span>;
+    }
+  };
+
+  // Handle review submission
+  const onSubmitReview = (data) => {
+    console.log({
+      rating: rating,
+      review: data.review,
+      doctor: confirmedDoctor?.fullName,
+      doctorId: confirmedDoctor?._id
+    });
+    
+    // Mark doctor as reviewed
+    if (confirmedDoctor?._id) {
+      addReviewedDoctor(confirmedDoctor._id);
+    }
+    
+    // Reset form and close modal
+    reset();
+    setRating(0);
+    setShowModal(false);
+    
+    // Show next doctor in queue
+    showNextDoctor();
+  };
+
+  // Handle skip (don't want to rate)
+  const handleSkipRating = () => {
+    // Mark doctor as reviewed (skipped)
+    if (confirmedDoctor?._id) {
+      addReviewedDoctor(confirmedDoctor._id);
+    }
+    
+    // Show next doctor in queue
+    showNextDoctor();
+  };
+
+  // Show next doctor from queue
+  const showNextDoctor = () => {
+    // Remove current doctor from queue
+    const newQueue = confirmedDoctorsQueue.slice(1);
+    setConfirmedDoctorsQueue(newQueue);
+    
+    if (newQueue.length > 0) {
+      // Show next doctor
+      setConfirmedDoctor(newQueue[0]);
+      setShowConfirmationCard(true);
+    } else {
+      // No more doctors to review
+      setConfirmedDoctor(null);
+      setShowConfirmationCard(false);
     }
   };
 
@@ -265,6 +371,137 @@ function MeningShifokorlarim() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Confirmation Card - Top to Down Animation */}
+{showConfirmationCard && confirmedDoctor && (
+  <div className="fixed top-5 right-5 z-50 animate-slide-down max-sm:right-0 max-sm:left-0 max-sm:mx-5">
+    <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-[340px] max-sm:w-auto border border-gray-100">
+      {/* Doctor Info */}
+      <div className="flex items-center gap-4 mb-4">
+        {confirmedDoctor.avatar ? (
+          <img
+            src={confirmedDoctor.avatar}
+            alt={confirmedDoctor.fullName}
+            className="w-16 h-16 rounded-full object-cover border-2 border-cyan-500"
+          />
+        ) : (
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center">
+            <span className="text-2xl font-bold text-white">
+              {confirmedDoctor.fullName?.[0] || "?"}
+            </span>
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-gray-800 text-lg break-words overflow-hidden line-clamp-2">
+            {confirmedDoctor.fullName || "Shifokor"}
+          </h3>
+          <p className="text-sm text-gray-500 truncate">
+            {confirmedDoctor.specialty || "Mutaxassis"}
+          </p>
+        </div>
+      </div>
+
+      {/* Message */}
+      <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+        Siz shifokor bilan qabulni yakunladingiz. Baholash va sharh qoldirmoqchimisiz?
+      </p>
+
+      {/* Buttons */}
+      <div className="space-y-3">
+        <button
+          onClick={() => setShowModal(true)}
+          className="w-full py-3 bg-cyan-500 text-white font-semibold rounded-xl hover:bg-cyan-600 transition-all shadow-lg"
+        >
+          Qabul qilish
+        </button>
+        
+        <button
+          onClick={handleSkipRating}
+          className="w-full py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all border border-gray-300"
+        >
+          Baholamoqchi emasman
+        </button>
+      </div>
+
+      {/* Close Button */}
+      <button
+        onClick={() => setShowConfirmationCard(false)}
+        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
+      >
+        <IoClose size={24} />
+      </button>
+    </div>
+  </div>
+)}
+
+      {/* Rating Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-5">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative animate-scale-in">
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowModal(false);
+                setRating(0);
+                reset();
+              }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+            >
+              <IoClose size={28} />
+            </button>
+
+            {/* Title */}
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+              Baholash
+            </h2>
+
+            {/* Star Rating */}
+            <div className="flex justify-center gap-2 mb-8">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                  className="transition-transform hover:scale-110 active:scale-95"
+                >
+                  {star <= (hoveredRating || rating) ? (
+                    <IoStar size={48} className="text-yellow-400" />
+                  ) : (
+                    <IoStarOutline size={48} className="text-gray-300" />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit(onSubmitReview)}>
+              {/* Review Textarea */}
+              <div className="mb-6">
+                <label className="block text-gray-700 font-semibold mb-3">
+                  Sharhingizni yozing
+                </label>
+                <textarea
+                  {...register('review', { required: true })}
+                  rows="5"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
+                  placeholder="Shifokor haqida fikringizni yozing..."
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full py-4 bg-cyan-500 text-white font-bold text-lg rounded-xl hover:bg-cyan-600 transition-all shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+                disabled={rating === 0}
+              >
+                Yuborish
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>
