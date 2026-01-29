@@ -20,19 +20,45 @@ function Boshsaxifa() {
   const [activeFilter, setActiveFilter] = useState("barchasi");
   const [userName, setUserName] = useState("mehmon");
 
-  // Foydalanuvchi nomini olish uchun localStorage'dan
+  // Foydalanuvchi nomini localStorage dan olish (yangi + eski format)
   useEffect(() => {
-    const userDataStr = localStorage.getItem('userData');
-    if (userDataStr) {
-      try {
-        const userData = JSON.parse(userDataStr);
-        if (userData?.name && userData.name.trim() !== '') {
-          setUserName(userData.name.trim());
+    const updateUserName = () => {
+      // 1. Yangi kalit — userProfile (profil tahriridan keladi)
+      const profileStr = localStorage.getItem('userProfile');
+      if (profileStr) {
+        try {
+          const profile = JSON.parse(profileStr);
+          if (profile?.username && profile.username.trim() !== '') {
+            setUserName(profile.username.trim());
+            return; // topilsa, eski formatga o'tmaymiz
+          }
+        } catch (e) {
+          console.error("userProfile parse xatosi:", e);
         }
-      } catch (e) {
-        console.error("userData parse xatosi:", e);
       }
-    }
+
+      // 2. Eski kalit — userData (agar yangisi bo'lmasa)
+      const userDataStr = localStorage.getItem('userData');
+      if (userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          if (userData?.name && userData.name.trim() !== '') {
+            setUserName(userData.name.trim());
+          }
+        } catch (e) {
+          console.error("userData parse xatosi:", e);
+        }
+      }
+    };
+
+    updateUserName();
+
+    // Agar profil o'zgarsa, sahifani yangilash uchun listener (ixtiyoriy, lekin foydali)
+    window.addEventListener('storage', updateUserName);
+
+    return () => {
+      window.removeEventListener('storage', updateUserName);
+    };
   }, []);
 
   const formatDoctor = useCallback((doctor) => {
@@ -73,13 +99,11 @@ function Boshsaxifa() {
     };
   }, []);
 
-  // Endi faqat bitta sahifa yuklaymiz (limit=100 yoki serverdan qancha qaytsa) shuning uchun pagination kerak emas
   const fetchDoctors = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Limitni kattaroq qilish mumkin, masalan 100 yoki serverda cheklov bo'lmasa
       const { data } = await axios.get(`https://app.dentago.uz/api/public/doctors?page=1&limit=100&sort=-rating`);
       if (!data.data) {
         throw new Error("API javobi to'g'ri formatda emas");
@@ -99,7 +123,7 @@ function Boshsaxifa() {
     fetchDoctors();
   }, [fetchDoctors]);
 
-  // Filtrlash
+  // Filtrlash logikasi (o'zgarmadi)
   useEffect(() => {
     if (allDoctors.length === 0) return;
 
@@ -159,15 +183,6 @@ function Boshsaxifa() {
     <div className="w-full mx-auto bg-white mb-[60px] overflow-hidden">
       {/* Header qismi */}
       <div className="bg-[#00C1F3] md:px-10 xl:px-[100px] lg:px-[70px] p-5 rounded-b-[30px] relative">
-        {/* <div className="flex justify-between items-center">
-          <button onClick={goToChats} className="relative text-white hover:opacity-80 transition">
-            <HiOutlineChatAlt2 className="text-3xl" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              0
-            </span>
-          </button>
-        </div> */}
-
         <div className="text-white mt-8">
           <h1 className="text-lg md:text-2xl font-semibold flex items-center gap-1">
             Salom, {userName}!
@@ -186,10 +201,6 @@ function Boshsaxifa() {
             className="w-full py-3 pl-10 pr-12 outline-0 rounded-4xl bg-white text-sm md:text-base shadow-[0px_0px_4px_0px_rgba(0,0,0,0.2)]"
           />
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xl" />
-          {/* <IoNotificationsOutline
-            className="text-white ml-5 text-3xl cursor-pointer hover:opacity-80"
-            onClick={notification}
-          /> */}
         </div>
       </div>
 
